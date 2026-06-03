@@ -873,22 +873,19 @@ function sendQuick(msg) {
   document.getElementById('chat-text-input').value = msg;
   sendChatMessage();
 }
-async function sendChatMessage() {
 
+async function sendChatMessage() {
   const inputEl = document.getElementById('chat-text-input');
   const message = inputEl.value.trim();
-
   if (!message) return;
-
   inputEl.value = '';
+  document.getElementById('chat-send-btn').disabled = true;
 
-  addBubble(message, 'user', document.getElementById('chat-msgs'));
+  const empty = document.getElementById('chat-empty');
+  if (empty) empty.style.display = 'none';
 
-  let reply =
-    "Based on your resume analysis, focus on adding relevant keywords, measurable achievements, and ATS-friendly formatting.";
-
-  addBubble(reply, 'ai', document.getElementById('chat-msgs'));
-}
+  const msgsArea = document.getElementById('chat-msgs');
+  addBubble(message, 'user', msgsArea);
   appState.chatHistory.push({ role:'user', content:message });
 
   const typing = document.createElement('div');
