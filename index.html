@@ -1,0 +1,316 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+<title>ResumeAI – AI Resume Analyzer</title>
+
+<!-- Fonts & Icons -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+
+<!-- ✅ Step 1: Stylesheet -->
+<link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+
+<div id="app">
+
+  <!-- Ambient orbs -->
+  <div class="orb orb1"></div>
+  <div class="orb orb2"></div>
+
+  <!-- ── TOP HEADER ── -->
+  <header class="app-header">
+    <div class="logo-wrap">
+      <div class="logo-mark"><i class="ti ti-file-analytics"></i></div>
+      <span class="logo-text">Resume<em>AI</em></span>
+    </div>
+    <div class="header-badge"><i class="ti ti-sparkles"></i> Claude AI</div>
+  </header>
+
+  <!-- ── SCROLLABLE BODY ── -->
+  <div class="screen-body" id="screen-body">
+
+    <!-- ==========================================
+         UPLOAD VIEW
+         ========================================== -->
+    <div class="view active" id="upload-view">
+      <div style="padding: 22px 18px 0;">
+
+        <div class="hero-pill"><i class="ti ti-wand"></i> AI-Powered</div>
+        <h1 class="hero-title">Analyze your resume.<br><span class="grad">Land more interviews.</span></h1>
+        <p class="hero-sub">Instant score, ATS compatibility, keyword gaps & personalized tips — all powered by Claude AI.</p>
+
+        <div class="stats-row">
+          <div class="stat-pill"><span class="stat-pill-num">100</span><span class="stat-pill-label">Point Scale</span></div>
+          <div class="stat-pill"><span class="stat-pill-num">5+</span><span class="stat-pill-label">Categories</span></div>
+          <div class="stat-pill"><span class="stat-pill-num">AI</span><span class="stat-pill-label">Chat Coach</span></div>
+        </div>
+
+        <div class="card">
+          <div class="card-label"><i class="ti ti-upload" style="color:var(--accent2)"></i> Your Resume</div>
+
+          <div class="drop-zone" id="drop-zone">
+            <input type="file" id="file-input" accept=".pdf,.doc,.docx,.txt">
+            <div class="dz-icon" id="dz-icon"><i class="ti ti-file-upload" id="dz-icon-i"></i></div>
+            <div class="dz-title" id="dz-title">Tap to upload resume</div>
+            <div class="dz-sub" id="dz-sub">or drag & drop your file here</div>
+            <div class="dz-formats">
+              <span class="fmt-tag">PDF</span>
+              <span class="fmt-tag">DOC</span>
+              <span class="fmt-tag">DOCX</span>
+              <span class="fmt-tag">TXT</span>
+            </div>
+          </div>
+          <div id="file-selected-name"></div>
+
+          <div id="paste-section">
+            <div class="or-divider">or paste resume text</div>
+            <div class="textarea-wrap">
+              <textarea id="resume-textarea"
+                placeholder="Paste your full resume here...&#10;Include: Summary, Experience, Skills, Education, Projects..."></textarea>
+              <span class="char-count" id="char-counter">0 chars</span>
+            </div>
+          </div>
+
+          <div id="paste-toggle-wrap" style="display:none; text-align:center; margin-top:10px;">
+            <span id="paste-toggle-btn" onclick="togglePasteSection()"
+              style="font-size:.75rem; color:var(--text3); cursor:pointer; text-decoration:underline; text-underline-offset:3px;">
+              + Also paste/edit text manually
+            </span>
+          </div>
+
+          <div class="field-group">
+            <label class="field-label" for="job-title-input">
+              Target job title <span>(required — analysis is tailored to this role)</span>
+            </label>
+            <input class="field-input" type="text" id="job-title-input"
+              placeholder="e.g. Senior Frontend Engineer, Product Manager…">
+          </div>
+
+          <button class="cta-btn" id="analyze-btn" onclick="startAnalysis()">
+            <i class="ti ti-wand"></i> Analyze My Resume
+          </button>
+        </div>
+      </div>
+    </div><!-- /upload-view -->
+
+
+    <!-- ==========================================
+         LOADING VIEW
+         ========================================== -->
+    <div class="view hidden" id="loading-view" style="height:100%;">
+      <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:40px 28px;height:100%;">
+        <div class="pulse-orb"><i class="ti ti-wand"></i></div>
+        <div class="loading-title">Analyzing your resume…</div>
+        <div class="loading-sub">Our AI is reading every line.<br>This takes about 15 seconds.</div>
+        <div class="step-list">
+          <div class="step-row" id="lstep-1">
+            <div class="step-dot"><i class="ti ti-file-text" style="font-size:10px"></i></div>
+            Parsing document structure
+          </div>
+          <div class="step-row" id="lstep-2">
+            <div class="step-dot"><i class="ti ti-checklist" style="font-size:10px"></i></div>
+            Evaluating content quality
+          </div>
+          <div class="step-row" id="lstep-3">
+            <div class="step-dot"><i class="ti ti-robot" style="font-size:10px"></i></div>
+            Checking ATS compatibility
+          </div>
+          <div class="step-row" id="lstep-4">
+            <div class="step-dot"><i class="ti ti-tags" style="font-size:10px"></i></div>
+            Analyzing keywords
+          </div>
+          <div class="step-row" id="lstep-5">
+            <div class="step-dot"><i class="ti ti-chart-bar" style="font-size:10px"></i></div>
+            Computing final score
+          </div>
+        </div>
+      </div>
+    </div><!-- /loading-view -->
+
+
+    <!-- ==========================================
+         RESULTS VIEW
+         ========================================== -->
+    <div class="view hidden" id="results-view">
+
+      <!-- Chat is full-screen, hide results scroll -->
+      <div id="results-scroll-area" class="results-scroll">
+
+        <!-- Score Hero -->
+        <div class="score-hero slide-up">
+          <div class="score-hero-top">
+            <div>
+              <div class="score-hero-label">Your Score</div>
+              <div id="job-title-display" style="font-size:.72rem;color:var(--accent2);font-weight:600;margin-top:2px;display:none"></div>
+            </div>
+            <button class="reanalyze-btn" onclick="resetToUpload()">
+              <i class="ti ti-refresh"></i> New Analysis
+            </button>
+          </div>
+          <div class="score-main-row">
+            <div class="ring-container">
+              <svg width="110" height="110" viewBox="0 0 110 110">
+                <circle class="ring-track" cx="55" cy="55" r="40"/>
+                <circle class="ring-fill" id="ring-fill" cx="55" cy="55" r="40"/>
+              </svg>
+              <div class="ring-center">
+                <div class="ring-num" id="score-display">0</div>
+                <div class="ring-denom">/100</div>
+              </div>
+            </div>
+            <div class="score-info">
+              <div class="score-grade" id="grade-label"></div>
+              <div class="score-verdict" id="verdict-text"></div>
+              <div class="sub-bars" id="sub-scores-grid"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab Panes -->
+        <div id="tab-issues" class="tab-pane active">
+          <div class="section-card slide-up" style="animation-delay:.05s">
+            <div class="section-header">
+              <div class="section-icon si-red"><i class="ti ti-alert-circle"></i></div>
+              <div class="section-title">Critical Issues</div>
+            </div>
+            <div id="critical-list"></div>
+          </div>
+          <div class="section-card slide-up" style="animation-delay:.1s">
+            <div class="section-header">
+              <div class="section-icon si-amber"><i class="ti ti-alert-triangle"></i></div>
+              <div class="section-title">Warnings</div>
+            </div>
+            <div id="warnings-list"></div>
+          </div>
+          <div class="section-card slide-up" style="animation-delay:.15s">
+            <div class="section-header">
+              <div class="section-icon si-green"><i class="ti ti-star"></i></div>
+              <div class="section-title">Strengths</div>
+            </div>
+            <div id="strengths-list"></div>
+          </div>
+        </div>
+
+        <div id="tab-improvements" class="tab-pane hidden">
+          <div class="section-card slide-up">
+            <div class="section-header">
+              <div class="section-icon si-purple"><i class="ti ti-rocket"></i></div>
+              <div class="section-title">Actionable Improvements</div>
+            </div>
+            <div id="improvements-list"></div>
+          </div>
+        </div>
+
+        <div id="tab-ats" class="tab-pane hidden">
+          <div class="section-card slide-up">
+            <div class="section-header">
+              <div class="section-icon si-purple"><i class="ti ti-robot"></i></div>
+              <div class="section-title">ATS Compatibility Report</div>
+            </div>
+            <div class="ats-grid" id="ats-summary-grid"></div>
+            <div id="ats-checks-list"></div>
+          </div>
+        </div>
+
+        <div id="tab-keywords" class="tab-pane hidden">
+          <div class="section-card slide-up">
+            <div class="section-header">
+              <div class="section-icon si-green"><i class="ti ti-check"></i></div>
+              <div class="section-title">Keywords Present</div>
+            </div>
+            <div class="chip-wrap" id="keywords-found-wrap"></div>
+          </div>
+          <div class="section-card slide-up" style="animation-delay:.05s;margin-top:12px">
+            <div class="section-header">
+              <div class="section-icon si-red"><i class="ti ti-x"></i></div>
+              <div class="section-title">Keywords to Add</div>
+            </div>
+            <div class="chip-wrap" id="keywords-missing-wrap"></div>
+          </div>
+        </div>
+
+      </div><!-- /results-scroll-area -->
+
+      <!-- CHAT - full screen inside results -->
+      <div id="tab-chat" class="tab-pane hidden" style="height:calc(100dvh - var(--header-height) - var(--nav-height) - var(--safe-bottom))">
+        <div class="chat-screen">
+          <div class="chat-top">
+            <div class="chat-avatar"><i class="ti ti-robot"></i></div>
+            <div class="chat-top-info">
+              <h4>Resume Coach AI</h4>
+              <p><span class="online-dot"></span> Online — ask anything</p>
+            </div>
+          </div>
+          <div class="chat-msgs" id="chat-msgs">
+            <div class="chat-empty" id="chat-empty">
+              <i class="ti ti-message-dots"></i>
+              Ask me anything about your resume.<br>I have full context of your analysis.
+              <div class="quick-btns">
+                <div class="q-btn" onclick="sendQuick('How can I improve my summary section?')">Improve summary</div>
+                <div class="q-btn" onclick="sendQuick('What skills should I add?')">Skills to add</div>
+                <div class="q-btn" onclick="sendQuick('How to make it more ATS-friendly?')">ATS tips</div>
+                <div class="q-btn" onclick="sendQuick('What are my biggest weaknesses?')">Weaknesses</div>
+              </div>
+            </div>
+          </div>
+          <div class="chat-input-bar">
+            <input class="chat-inp" type="text" id="chat-text-input"
+              placeholder="Ask about your resume…"
+              onkeydown="if(event.key==='Enter'){event.preventDefault();sendChatMessage();}">
+            <button class="send-btn" id="chat-send-btn" onclick="sendChatMessage()">
+              <i class="ti ti-send"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /results-view -->
+
+  </div><!-- /screen-body -->
+
+  <!-- ── BOTTOM NAV (results only) ── -->
+  <nav class="bottom-nav hidden" id="bottom-nav">
+    <div class="nav-item active" data-tab="issues" onclick="switchTab('issues')">
+      <div class="nav-icon"><i class="ti ti-alert-triangle"></i></div>
+      <span class="nav-label">Issues</span>
+    </div>
+    <div class="nav-item" data-tab="improvements" onclick="switchTab('improvements')">
+      <div class="nav-icon"><i class="ti ti-bulb"></i></div>
+      <span class="nav-label">Improve</span>
+    </div>
+    <div class="nav-item" data-tab="ats" onclick="switchTab('ats')">
+      <div class="nav-icon"><i class="ti ti-robot"></i></div>
+      <span class="nav-label">ATS</span>
+    </div>
+    <div class="nav-item" data-tab="keywords" onclick="switchTab('keywords')">
+      <div class="nav-icon"><i class="ti ti-tags"></i></div>
+      <span class="nav-label">Keywords</span>
+    </div>
+    <div class="nav-item" data-tab="chat" onclick="switchTab('chat')">
+      <div class="nav-icon"><i class="ti ti-message-circle"></i></div>
+      <span class="nav-label">Ask AI</span>
+    </div>
+  </nav>
+
+</div><!-- /app -->
+
+<!-- ================================================================
+     SCRIPT LOADING ORDER — DO NOT CHANGE
+     ================================================================
+     1. config.js  →  loads your secret API key (ANTHROPIC_API_KEY)
+     2. app.js     →  main logic (reads ANTHROPIC_API_KEY from config)
+     ================================================================ -->
+
+<!-- ✅ Step 2: Secret config (API key) — load BEFORE app.js -->
+
+<script src="config.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
