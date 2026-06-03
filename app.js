@@ -905,25 +905,37 @@ Strengths: ${(d.strengths||[]).map(i=>i.title).join(', ')||'None'}
 ATS score: ${(d.ats||{}).score||'N/A'}/100. Missing keywords: ${(d.keywords_missing||[]).join(', ')||'None'}
 Reply helpfully and concisely with advice specific to the ${appState.jobTitle || 'target'} role. Keep under 150 words. Be direct and actionable.`;
 
-   const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-      method: 'POST',
- headers: {
-  "Authorization": `Bearer ${ANTHROPIC_API_KEY}`,
-  "Content-Type": "application/json"
-},
-    body: JSON.stringify({
-  model: 'anthropic/claude-sonnet-4',
-  max_tokens: 1000,
-  messages: [
-    {
-      role: 'system',
-      content: sys
-    },
-    ...appState.chatHistory
-  ]
-})
-    });
+async function startAnalysis() {
+
+  try {
+
+    const res = await fetch(
+      "https://openrouter.ai/api/v1/chat/completions",
+      {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${ANTHROPIC_API_KEY}`,
+          "Content-Type": "application/json"
+        }
+      }
+    );
+
+  } catch(err) {
+    console.error(err);
+  }
+
+}
   const data = await res.json();
+
+console.log(data);
+
+if (!res.ok) {
+  const msg =
+    data?.error?.message ||
+    `HTTP ${res.status}`;
+
+  throw new Error(msg);
+}
 
 const reply =
   data?.choices?.[0]?.message?.content ||
